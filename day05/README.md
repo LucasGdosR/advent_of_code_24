@@ -1,4 +1,4 @@
-Part two of this challenge basically requires part one, so I didn't split the files. Instead, I decided it would be fun to solve it using dependency graphs in the both in the form of an adjacency list and the form of an adjacency matrix (TODO).
+Part two of this challenge basically requires part one, so I didn't split the files. Instead, I decided it would be fun to solve it using dependency graphs both in the form of an adjacency list and the form of an adjacency matrix (TODO). Besides of the list / matrix approach, I solved it using an inverted graph, and also by doing a topological sort first, then checking if the ordering of the pages respects the topological sort (which is the classier approach, to be fair).
 
 Main takeaways:
 - List:

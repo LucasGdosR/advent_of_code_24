@@ -1,0 +1,12 @@
+This was an interesting challenge. It is remarkably computationally intensive, comparing to the previous ones. There are many memes on reddit regarding how much the infinite loop detection takes to run, making you wonder if you're in an infinite loop yourself. My first implementation in python tried to add obstacles in every space in the grid, but then I figured only obstacles in the guard's original path may change it. With this approach it took 23 seconds to run. Still a lot, but much better.
+
+This made me especially interested in making it fast in my C implementation. In my first single-threaded implementation, I got it down to 640 ms with a cold start. I still need to see if I can improve it. Later, it should be pretty easy to multithread the main loop, splitting the indexes among threads, and making `input` immutable, using the coordinates of `obstacle` directly in a test instead, like the python implementation (since python strings are immutable). Multithread (TODO).
+
+Main takeaways:
+1. Part 1
+- Incrementing enums directly to change state is pretty cool in C. Not all languages allow that, but you can use a table and index into it using the value of the enum (done in the python implementation);
+- Know your data, sentinels, yada yada (check previous days for more details);
+- This is a pretty basic AI implementation of an agent with states and actions. The guard moves according to its state, and changes state based on encountering obstacles.
+2. Part 2
+- Hashset implementation: there's a hashtable with a linked list on each slot of the hashtable. This implementation uses a prime number for the hashtable size (10,007), and a simple hash function to combine three integers and spread them along the table. The hashset is implemented with an arena, requiring no dynamic memory allocations, and allowing blazingly fast reutilization of the same memory. Whenever I need a fresh state, `set_init` sets `arena_alloc_pos` to `0`, and all the memory is effectively free, with no need for calling `malloc` leter. This is, by far, the best use of an arena in my implementations of the Advent of Code so far;
+- This part requires starting from a fresh state each iteration. The guard must always start from the same spot, and the map must always have obstacles at the same places. Any mutation must be undone, as is the case of `input`, and initial state should be cached, as is the case of `initial_guard`.

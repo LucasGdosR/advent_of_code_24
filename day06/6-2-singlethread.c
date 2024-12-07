@@ -41,11 +41,13 @@ struct set {
 };
 
 struct node NIL_NODE;
+uint16_t visited = 0;
+uint16_t loops_found = 0;
 
 struct guard find_guard();
 bool within_bounds(struct point p);
-struct point move_to_exit_and_record_path(struct guard *guard, uint16_t *visited);
-bool test_loop(struct set *states, struct guard *g, uint16_t *loops_found);
+struct point move_to_exit_and_record_path(struct guard *guard);
+bool test_loop(struct set *states, struct guard *g);
 
 void set_init(struct set *set);
 bool set_add(struct set *s, struct guard g);
@@ -71,9 +73,8 @@ void main(int argc, char const *argv[]) {
         
     // Part 1 is still solved for getting the path the guard normally takes
     // to reduce the possibilities of obstacle placements in part 2
-    uint16_t visited = 0;
     while (within_bounds(guard.p)) {
-        struct point p = move_to_exit_and_record_path(&guard, &visited);
+        struct point p = move_to_exit_and_record_path(&guard);
         if (p.x) {
             regular_path[visited] = p;
         }
@@ -84,14 +85,13 @@ void main(int argc, char const *argv[]) {
     // Storing the path from part 1 allows part 2 to test only relevant tiles for obstacles
     clock_t begin = clock();
     struct set states;
-    uint16_t loops_found = 0;
     for (uint16_t i = 0; i < REGULAR_PATH_LENGTH; i++) {
         set_init(&states);
         struct guard g = initial_guard;
 
         struct point obstacle = regular_path[i];
         input[obstacle.y][obstacle.x] = OBSTACLE;
-        while (test_loop(&states, &g, &loops_found));
+        while (test_loop(&states, &g));
         input[obstacle.y][obstacle.x] = NOT_VISITED;
     }
     clock_t end = clock();
@@ -113,7 +113,7 @@ bool within_bounds(struct point p) {
         && (p.y != 0) && (p.y != GRID_SIZE_PLUS_SENTINELS - 1);
 }
 
-struct point move_to_exit_and_record_path(struct guard *guard, uint16_t *visited) {
+struct point move_to_exit_and_record_path(struct guard *guard) {
     struct point destination = guard->p;
     enum Facing facing = guard->facing;
     destination.x += (facing == RIGHT) - (facing == LEFT);
@@ -122,7 +122,7 @@ struct point move_to_exit_and_record_path(struct guard *guard, uint16_t *visited
     {
     case NOT_VISITED:
         input[destination.y][destination.x] = 'X';
-        (*visited)++;
+        visited++;
         guard->p = destination;
         return destination;
     case OBSTACLE:
@@ -134,7 +134,7 @@ struct point move_to_exit_and_record_path(struct guard *guard, uint16_t *visited
     }
 }
 
-bool test_loop(struct set *states, struct guard *g, uint16_t *loops_found) {
+bool test_loop(struct set *states, struct guard *g) {
     struct point dst = g->p;
     enum Facing f = g->facing;
     dst.x += (f == RIGHT) - (f == LEFT);
@@ -153,7 +153,7 @@ bool test_loop(struct set *states, struct guard *g, uint16_t *loops_found) {
     if (set_add(states, *g)) {
         return true;
     }
-    (*loops_found)++;
+    loops_found++;
     return false;
 }
 

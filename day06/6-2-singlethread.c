@@ -168,10 +168,6 @@ int set_add(struct set *s, struct guard *g) {
     if (set_has(s, g, i)) {
         return 0;
     }
-    if (s->arena_alloc_pos >= HASHTABLE_SIZE) {
-        printf("Deu ruim\n");
-        exit(1);
-    };
     s->arena[s->arena_alloc_pos] = (struct node) {
         .state = *g,
         .next = s->states[i]

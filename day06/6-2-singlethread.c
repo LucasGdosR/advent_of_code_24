@@ -48,9 +48,9 @@ struct point move_to_exit_and_record_path(struct guard *guard, uint16_t *visited
 bool test_loop(struct set *states, struct guard *g, uint16_t *loops_found);
 
 void set_init(struct set *set);
-bool set_add(struct set *s, struct guard *g);
-bool set_has(struct set *s, struct guard *g, uint32_t i);
-uint32_t set_hash(struct guard *g);
+bool set_add(struct set *s, struct guard g);
+bool set_has(struct set *s, struct guard g, uint32_t i);
+uint32_t set_hash(struct guard g);
 
 void read_input();
 void add_sentinels();
@@ -150,7 +150,7 @@ bool test_loop(struct set *states, struct guard *g, uint16_t *loops_found) {
         g->p = dst;
     }
 
-    if (set_add(states, g)) {
+    if (set_add(states, *g)) {
         return true;
     }
     (*loops_found)++;
@@ -165,40 +165,37 @@ void set_init(struct set *set) {
     set->arena_alloc_pos = 0;
 }
 
-bool set_add(struct set *s, struct guard *g) {
+bool set_add(struct set *s, struct guard g) {
     int i = set_hash(g);
     if (set_has(s, g, i)) {
         return false;
     }
     s->arena[s->arena_alloc_pos] = (struct node) {
-        .state = *g,
+        .state = g,
         .next = s->states[i]
         };
     s->states[i] = &s->arena[s->arena_alloc_pos++];
     return true;
 }
 
-bool set_has(struct set *s, struct guard *g, uint32_t i) {
-    struct guard guard = *g;
+bool set_has(struct set *s, struct guard g, uint32_t i) {
     struct node *curr = s->states[i];
     while (curr != &NIL_NODE) {
         struct guard state = curr->state;
         curr = curr->next;
-        if (state.facing == guard.facing
-         && state.p.x == guard.p.x
-         && state.p.y == guard.p.y) {
+        // Testing two out of three is sufficient
+        // but testing all three is remarkably faster
+        if (state.facing == g.facing
+         && state.p.x == g.p.x
+         && state.p.y == g.p.y) {
             return true;
         }
     }
     return false;
 }
 
-uint32_t set_hash(struct guard *g) {
-    struct guard state = *g;
-    uint32_t hash = state.facing;
-    hash = hash * 131 + state.p.x;
-    hash = hash * 131 + state.p.y;
-    return hash % HASHTABLE_SIZE;
+uint32_t set_hash(struct guard g) {
+    return (131*131*g.facing + 131*g.p.x + g.p.y) % HASHTABLE_SIZE;
 }
 
 void read_input() {

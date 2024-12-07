@@ -1,6 +1,6 @@
 This was an interesting challenge. It is remarkably computationally intensive, comparing to the previous ones. There are many memes on reddit regarding how much the infinite loop detection takes to run, making you wonder if you're in an infinite loop yourself. My first implementation in python tried to add obstacles in every space in the grid, but then I figured only obstacles in the guard's original path may change it. With this approach it took 23 seconds to run. Still a lot, but much better.
 
-This made me especially interested in making it fast in my C implementation. In my first single-threaded implementation, I got it down to 640 ms with a cold start. I still need to see if I can improve it. Later, it should be pretty easy to multithread the main loop, splitting the indexes among threads, and making `input` immutable, using the coordinates of `obstacle` directly in a test instead, like the python implementation (since python strings are immutable). Multithread (TODO).
+This made me especially interested in making it fast in my C implementation. In my first single-threaded implementation, I got it down to 160 ms with a cold start. It should be pretty easy to multithread the main loop, splitting the indexes among threads, and making `input` immutable, using the coordinates of `obstacle` directly in a test instead, like the python implementation (since python strings are immutable). Multithread (TODO).
 
 Main takeaways:
 1. Part 1

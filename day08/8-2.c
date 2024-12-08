@@ -110,10 +110,7 @@ void append(char key, struct p e)
         {
             new_arr[i] = v.ps[i];
         }
-        if (v.ps)
-        {
-            free(v.ps);
-        }
+        free(v.ps);
         v.ps = new_arr;
         v.capacity = INITIAL_CAPACITY + (v.capacity << 1);
     }

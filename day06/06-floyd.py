@@ -25,9 +25,10 @@ def find_guard():
             if input[i][j] == '^':
                 return {'facing': Facing.UP, 'x': j, 'y': i }
 
-initial_guard = find_guard()
+g = find_guard()
 regular_path = set()
-regular_path.add((initial_guard['x'], initial_guard['y']))
+regular_path.add((g['x'], g['y']))
+starting_states = set()
 
 def finding_regular_path():
     x = g['x'] + (g['facing'] == Facing.RIGHT) - (g['facing'] == Facing.LEFT)
@@ -40,18 +41,19 @@ def finding_regular_path():
     if '#' == input[y][x]:
         g['facing'] = facing_progression[g['facing'].value]
     else:
-        regular_path.add((x, y))
+        if (x, y) not in regular_path:
+            regular_path.add((x, y))
+            starting_states.add((g['facing'], g['x'], g['y']))
         g['x'] = x
         g['y'] = y
     return True
 
-g = initial_guard.copy()
 while finding_regular_path():
     continue
 
-def floyd_cycle_detection():
-    tortoise = initial_guard.copy()
-    hare = initial_guard.copy()
+def floyd_cycle_detection(g):
+    tortoise = g.copy()
+    hare = g.copy()
     while True:
         tortoise = move(tortoise)
         hare = move(move(hare))
@@ -77,6 +79,10 @@ def move(g):
     return g
 
 loops_found = 0
-for obstacle in regular_path:
-    loops_found += floyd_cycle_detection()
+for f, x, y in starting_states:
+    g = {'facing': f, 'x': x, 'y': y}
+    x += (f == Facing.RIGHT) - (f == Facing.LEFT)
+    y += (f == Facing.DOWN ) - (f == Facing.UP)
+    obstacle = (x, y)
+    loops_found += floyd_cycle_detection(g)
 print(loops_found)

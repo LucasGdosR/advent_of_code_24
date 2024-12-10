@@ -21,15 +21,15 @@ struct vec {
 void append(char key, struct p e);
 
 void init();
-void read_input();
+void read_input(char (*input)[GRID_SIZE + 1]);
 
-char input[GRID_SIZE][GRID_SIZE + 1];
 bool antinodes[GRID_SIZE][GRID_SIZE];
 struct vec dict[ASCII_MAX];
 
 void main(int argc, char const *argv[])
 {
-    init();
+    char input[GRID_SIZE][GRID_SIZE + 1];
+    read_input(input);
 
     // Build a dict by iterating through the input,
     for (int i = 0; i < GRID_SIZE; i++)
@@ -105,27 +105,14 @@ void append(char key, struct p e)
     struct vec v = dict[key];
     if (v.size == v.capacity)
     {
-        struct p *new_arr = malloc(INITIAL_CAPACITY + 2 * v.capacity * sizeof(struct p));
-        for (int i = 0; i < v.size; i++)
-        {
-            new_arr[i] = v.ps[i];
-        }
-        free(v.ps);
-        v.ps = new_arr;
         v.capacity = INITIAL_CAPACITY + (v.capacity << 1);
+        v.ps = realloc(v.ps, v.capacity * sizeof(struct p));
     }
     v.ps[v.size++] = e;
     dict[key] = v;
 }
 
-void init()
-{
-    read_input();
-    memset(antinodes, 0, sizeof(antinodes));
-    memset(dict, 0, sizeof(dict));
-}
-
-void read_input()
+void read_input(char (*input)[GRID_SIZE + 1])
 {
     FILE *fptr = fopen("8-input", "r");
     for (int i = 0; i < GRID_SIZE; i++)

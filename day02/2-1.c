@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define MAX_LEVELS_PER_REPORT 8
 #define LINE_LENGTH 32
@@ -11,8 +10,7 @@ int is_safe(long int *report);
 
 void main(int argc, char const *argv[]) {
     char line[LINE_LENGTH];
-    long int reports[INPUT_SIZE][MAX_LEVELS_PER_REPORT];
-    memset(reports, 0, sizeof(reports));
+    long int reports[INPUT_SIZE][MAX_LEVELS_PER_REPORT] = {};
     read_input(line, "2-input", reports);
 
     int safe_reports = 0;

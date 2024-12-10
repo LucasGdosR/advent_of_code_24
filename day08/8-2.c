@@ -105,14 +105,8 @@ void append(char key, struct p e)
     struct vec v = dict[key];
     if (v.size == v.capacity)
     {
-        struct p *new_arr = malloc(INITIAL_CAPACITY + 2 * v.capacity * sizeof(struct p));
-        for (int i = 0; i < v.size; i++)
-        {
-            new_arr[i] = v.ps[i];
-        }
-        free(v.ps);
-        v.ps = new_arr;
         v.capacity = INITIAL_CAPACITY + (v.capacity << 1);
+        v.ps = realloc(v.ps, v.capacity * sizeof(struct p));
     }
     v.ps[v.size++] = e;
     dict[key] = v;

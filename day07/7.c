@@ -10,14 +10,13 @@
 
 int can_combine(long tv, long *ops, long acc, long ops_left);
 long concat(long big, long small);
-void read_input();
-
-char buffer[LINE_LENGTH];
-long test_values[INPUT_SIZE];
-long operands[INPUT_SIZE][MAX_OPERANDS + SPACE_FOR_STORING_LENGTH];
+void read_input(long *test_values, long (*operands)[MAX_OPERANDS + SPACE_FOR_STORING_LENGTH]);
 
 void main(int argc, char const *argv[]) {
-    read_input();
+    long test_values[INPUT_SIZE];
+    long operands[INPUT_SIZE][MAX_OPERANDS + SPACE_FOR_STORING_LENGTH];
+    read_input(test_values, operands);
+
     unsigned long calibration_result = 0;
     for (int i = 0; i < INPUT_SIZE; i++) {
         long tv = test_values[i], *ops = operands[i];
@@ -39,8 +38,9 @@ long concat(long big, long small) {
     return big * pow(10., (double) ((int) log10(small) + 1)) + small;
 }
 
-void read_input() {
+void read_input(long *test_values, long (*operands)[MAX_OPERANDS + SPACE_FOR_STORING_LENGTH]) {
     FILE *fptr = fopen("7-input", "r");
+    char buffer[LINE_LENGTH];
     for (int i = 0; i < INPUT_SIZE; i++) {
         fgets(buffer, LINE_LENGTH, fptr);
         char *token, *ep, *rest = buffer;

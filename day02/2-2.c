@@ -12,16 +12,12 @@ void generate_dampened_reports(long int *report, long int buffer[][MAX_LEVELS_PE
 
 void main(int argc, char const *argv[]) {
     char line[LINE_LENGTH];
-    long int reports[INPUT_SIZE][MAX_LEVELS_PER_REPORT];
-    memset(reports, 0, sizeof(reports));
+    long int reports[INPUT_SIZE][MAX_LEVELS_PER_REPORT] = {};
     read_input(line, "2-input", reports);
     
     int safe_reports = 0;
     for (int i = 0; i < INPUT_SIZE; i++) {
-        long int dampened_reports[MAX_LEVELS_PER_REPORT][MAX_LEVELS_PER_REPORT];
-        for (int i = 0; i < MAX_LEVELS_PER_REPORT; i++) 
-            for (int j = 0; j < MAX_LEVELS_PER_REPORT; j++)
-                dampened_reports[i][j] = 0;
+        long int dampened_reports[MAX_LEVELS_PER_REPORT][MAX_LEVELS_PER_REPORT] = {};
         generate_dampened_reports(reports[i], dampened_reports);
         for (int i = 0; i < MAX_LEVELS_PER_REPORT; i++) {
             if (is_safe(dampened_reports[i])) {

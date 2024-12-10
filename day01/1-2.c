@@ -15,7 +15,7 @@ struct arena {
     int arena_alloc_pos;
 };
 
-struct node NIL_NODE = { .key = 0, .value = 0, .next = &NIL_NODE };
+struct node NIL_NODE = { .next = &NIL_NODE };
 
 struct node* update_list(struct node *head, struct node *next, int key, struct arena *arena);
 int get_similarity(struct node *node, int key);

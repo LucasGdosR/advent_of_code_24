@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define GRID_SIZE 130
@@ -47,9 +48,8 @@ struct job_arg {
     struct guard initial_guard;
 };
 
-struct node NIL_NODE;
-uint16_t visited = 0;
-_Atomic uint16_t paths_shared_index = 0;
+uint16_t visited;
+_Atomic uint16_t paths_shared_index;
 
 struct guard find_guard();
 bool within_bounds(struct point p);
@@ -62,16 +62,12 @@ bool set_has(struct set *s, struct guard g, uint32_t i);
 uint32_t set_hash(struct guard g);
 
 void read_input();
-void add_sentinels();
-void init_nil_node();
 void *job(void *arg);
 
 char input[GRID_SIZE_PLUS_SENTINELS][GRID_SIZE_PLUS_SENTINELS];
 
 void main(int argc, char const *argv[]) {
     read_input();
-    add_sentinels();
-    init_nil_node();
     struct guard initial_guard = find_guard();
     struct guard guard = initial_guard;
 
@@ -91,7 +87,6 @@ void main(int argc, char const *argv[]) {
 
     // Part 2
     // Storing the path from part 1 allows part 2 to test only relevant tiles for obstacles
-    paths_shared_index = 0;
     struct timespec begin, end;
     clock_gettime(CLOCK_MONOTONIC, &begin);
     
@@ -117,7 +112,6 @@ void *job(void *arg) {
     struct job_arg ja = *(struct job_arg*)arg;
     struct set states;
     uint16_t *loops_found = malloc(sizeof(uint16_t));
-    *loops_found = 0;
     for (;;) {
         uint16_t curr_index = paths_shared_index++;
         if (curr_index >= REGULAR_PATH_LENGTH) {
@@ -132,9 +126,9 @@ void *job(void *arg) {
 
 struct guard find_guard() {
     for (uint8_t i = 1; i <= GRID_SIZE; i++) {
-        for (uint8_t j = 1; j < GRID_SIZE; j++) {
+        for (uint8_t j = 1; j <= GRID_SIZE; j++) {
             if (input[i][j] == '^')
-                return (struct guard) { .facing = UP, .p = (struct point) { .x = j, .y = i } };
+                return (struct guard) { .p = (struct point) { .x = j, .y = i } };
         }
     }
 }
@@ -158,10 +152,10 @@ struct point move_to_exit_and_record_path(struct guard *guard) {
         return destination;
     case OBSTACLE:
         guard->facing = (guard->facing + 1) % DIRECTIONS;
-        return (struct point) { .x = 0, .y = 0 };
+        return (struct point) {};
     default:
         guard->p = destination;
-        return (struct point) { .x = 0, .y = 0 };
+        return (struct point) {};
     }
 }
 
@@ -190,10 +184,7 @@ bool test_loop(struct set *states, struct guard *g, struct point obstacle, uint1
 }
 
 void set_init(struct set *set) {
-    struct node **states = set->states;
-    for (uint16_t i = 0; i < HASHTABLE_SIZE; i++) {
-        states[i] = &NIL_NODE;
-    }
+    memset(set->states, 0, sizeof(struct state*) * HASHTABLE_SIZE);
     set->arena_alloc_pos = 0;
 }
 
@@ -212,7 +203,7 @@ bool set_add(struct set *s, struct guard g) {
 
 bool set_has(struct set *s, struct guard g, uint32_t i) {
     struct node *curr = s->states[i];
-    while (curr != &NIL_NODE) {
+    while (curr) {
         struct guard state = curr->state;
         curr = curr->next;
         // Testing two out of three is sufficient
@@ -236,26 +227,4 @@ void read_input() {
         fgets(input[i + 1] + 1, GRID_SIZE + 2, fptr);
     }
     fclose(fptr);
-}
-
-void add_sentinels() {
-    for (uint8_t i = 0; i < GRID_SIZE_PLUS_SENTINELS; i++) {
-        input[0][i] = 0;
-        input[GRID_SIZE_PLUS_SENTINELS - 1][i] = 0;
-        input[i][0] = 0;
-        input[i][GRID_SIZE_PLUS_SENTINELS - 1] = 0;
-    } 
-}
-
-void init_nil_node() {
-    NIL_NODE = (struct node) {
-        .state = (struct guard) {
-            .facing = UP,
-            .p = (struct point) {
-                .x = 0,
-                .y = 0
-                }
-            },
-        .next = &NIL_NODE
-        };
 }

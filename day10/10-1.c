@@ -19,7 +19,7 @@ void main(int argc, char **argv) {
     read_input();
     memset(hilltop_reached, 0, sizeof(hilltop_reached));
     
-    for (__uint8_t i = 1; i < GRID_SIZE_PLUS_SENTINELS - 1; i++) {
+    for (__uint16_t i = 1; i < GRID_SIZE_PLUS_SENTINELS - 1; i++) {
         for (__uint8_t j = 1; j < GRID_SIZE_PLUS_SENTINELS - 1; j++) {
             char c = grid[i][j];
             if (c == TRAILHEAD) {

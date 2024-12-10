@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define GRID_SIZE 50
 #define ASCII_MAX 255
@@ -20,15 +19,14 @@ struct vec {
 
 void append(char key, struct p e);
 
-void init();
-void read_input();
+void read_input(char (*input)[GRID_SIZE + 1]);
 
-char input[GRID_SIZE][GRID_SIZE + 1];
 bool antinodes[GRID_SIZE][GRID_SIZE];
 struct vec dict[ASCII_MAX];
 
 void main(int argc, char const *argv[]) {
-    init();
+    char input[GRID_SIZE][GRID_SIZE + 1];
+    read_input(input);
 
     // Build a dict by iterating through the input,
     for (int i = 0; i < GRID_SIZE; i++) {
@@ -112,14 +110,7 @@ void append(char key, struct p e)
     dict[key] = v;
 }
 
-void init()
-{
-    read_input();
-    memset(antinodes, 0, sizeof(antinodes));
-    memset(dict, 0, sizeof(dict));
-}
-
-void read_input()
+void read_input(char (*input)[GRID_SIZE + 1])
 {
     FILE *fptr = fopen("8-input", "r");
     for (int i = 0; i < GRID_SIZE; i++)

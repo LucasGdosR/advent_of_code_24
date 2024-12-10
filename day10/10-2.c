@@ -8,7 +8,6 @@
 
 __uint16_t hike_uphill(__uint8_t i, __uint8_t j, char c);
 void read_input();
-void add_sentinels();
 
 char grid[GRID_SIZE_PLUS_SENTINELS][GRID_SIZE_PLUS_SENTINELS];
 
@@ -27,7 +26,7 @@ void main(int argc, char **argv) {
     printf("Ratings sum: %d\n", ratings_sum);
 }
 
-__uint16_t hike_uphill(__uint8_t i, __uint8_t j, char c,) {
+__uint16_t hike_uphill(__uint8_t i, __uint8_t j, char c) {
     if (c == HILLTOP) {
         return 1;
     }
@@ -50,13 +49,4 @@ void read_input() {
         fgets(grid[i + 1] + 1, GRID_SIZE + 2, fptr);
     }
     fclose(fptr);
-}
-
-void add_sentinels() {
-    for (int i = 0; i < GRID_SIZE_PLUS_SENTINELS; i++) {
-        grid[0][i] = 0;
-        grid[GRID_SIZE_PLUS_SENTINELS - 1][i] = 0;
-        grid[i][0] = 0;
-        grid[i][GRID_SIZE_PLUS_SENTINELS - 1] = 0;
-    } 
 }

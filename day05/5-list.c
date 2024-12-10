@@ -25,7 +25,6 @@ void read_input();
 void init_adj_list(FILE *fp, char buffer[LINE_LENGTH]);
 void init_updates(FILE *fp, char buffer[LINE_LENGTH]);
 
-struct node NIL_NODE = { .val = 0, .next = &NIL_NODE };
 struct adj_list adj_list;
 int updates[UPDATES][MAX_PAGES_PER_UPDATE];
 
@@ -51,7 +50,7 @@ int is_valid(int update[MAX_PAGES_PER_UPDATE]) {
     for (i = 0; i < MAX_PAGES_PER_UPDATE && update[i]; i++) {
         int page = update[i];
         struct node *prereqs = adj_list.adj_pages[page];
-        while (prereqs != &NIL_NODE) {
+        while (prereqs) {
             int prereq = prereqs->val;
             prereqs = prereqs->next;
 
@@ -68,8 +67,7 @@ int is_valid(int update[MAX_PAGES_PER_UPDATE]) {
 }
 
 int fix(int update[MAX_PAGES_PER_UPDATE]) {
-    int len = 0, correct_order[MAX_PAGES_PER_UPDATE];
-    memset(correct_order, 0, sizeof(correct_order));
+    int len = 0, correct_order[MAX_PAGES_PER_UPDATE] = {};
 
     while (update[len] && len < MAX_PAGES_PER_UPDATE) {
         // Iterate through pages in the update
@@ -90,7 +88,7 @@ int fix(int update[MAX_PAGES_PER_UPDATE]) {
             int unmet_prereqs = 0;
             struct node *prereqs = adj_list.adj_pages[page];
             // Iterate through prereqs in adjacency list
-            while (prereqs != &NIL_NODE) {
+            while (prereqs) {
                 int prereq = prereqs->val;
                 prereqs = prereqs->next;
 
@@ -124,10 +122,6 @@ void read_input() {
 }
 
 void init_adj_list(FILE *fp, char *buffer) {
-    for (int i = 0; i < UPPER_BOUND_PAGE; i++) {
-        adj_list.adj_pages[i] = &NIL_NODE;
-    }
-    
     for (int i = 0, src, dst; i < PAGE_ORDERING_RULES; i++) {
         fgets(buffer, LINE_LENGTH, fp);
         sscanf(buffer, "%d|%d", &dst, &src);
@@ -137,8 +131,6 @@ void init_adj_list(FILE *fp, char *buffer) {
 }
 
 void init_updates(FILE *fp, char *buffer) {
-    memset(updates, 0, sizeof(updates));
-    
     for (int i = 0; i < UPDATES; i++) {
         fgets(buffer, LINE_LENGTH, fp);
         char *token, *rest = buffer;

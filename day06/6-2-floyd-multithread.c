@@ -40,8 +40,8 @@ struct job_arg {
     struct guard initial_guard;
 };
 
-uint16_t visited = 0;
-_Atomic uint16_t paths_shared_index = 0;
+uint16_t visited;
+_Atomic uint16_t paths_shared_index;
 
 struct guard find_guard();
 bool within_bounds(struct point p);
@@ -51,14 +51,12 @@ bool floyd_cycle_detection(struct guard starting_state, struct point obstacle);
 struct guard move(struct guard g, struct point obstacle);
 
 void read_input();
-void add_sentinels();
 void *job(void *arg);
 
 char input[GRID_SIZE_PLUS_SENTINELS][GRID_SIZE_PLUS_SENTINELS];
 
 void main(int argc, char const *argv[]) {
     read_input();
-    add_sentinels();
     struct guard initial_guard = find_guard();
     struct guard_in_new_point g = (struct guard_in_new_point) { .g = initial_guard, .new_point = true };
 
@@ -135,7 +133,6 @@ struct guard move(struct guard g, struct point obstacle) {
 void *job(void *arg) {
     struct job_arg ja = *(struct job_arg*)arg;
     uint16_t *loops_found = malloc(sizeof(uint16_t));
-    *loops_found = 0;
     for (;;) {
         uint16_t curr_index = paths_shared_index++;
         if (curr_index >= REGULAR_PATH_LENGTH) {
@@ -147,9 +144,9 @@ void *job(void *arg) {
 
 struct guard find_guard() {
     for (uint8_t i = 1; i <= GRID_SIZE; i++) {
-        for (uint8_t j = 1; j < GRID_SIZE; j++) {
+        for (uint8_t j = 1; j <= GRID_SIZE; j++) {
             if (input[i][j] == '^')
-                return (struct guard) { .facing = UP, .p = (struct point) { .x = j, .y = i } };
+                return (struct guard) { .p = (struct point) { .x = j, .y = i } };
         }
     }
 }
@@ -189,17 +186,4 @@ void read_input() {
         fgets(input[i + 2] + 2, GRID_SIZE + 2, fptr);
     }
     fclose(fptr);
-}
-
-void add_sentinels() {
-    for (uint8_t i = 0; i < GRID_SIZE_PLUS_SENTINELS; i++) {
-        input[0][i] = 0;
-        input[1][i] = 0;
-        input[GRID_SIZE_PLUS_SENTINELS - 2][i] = 0;
-        input[GRID_SIZE_PLUS_SENTINELS - 1][i] = 0;
-        input[i][0] = 0;
-        input[i][1] = 0;
-        input[i][GRID_SIZE_PLUS_SENTINELS - 2] = 0;
-        input[i][GRID_SIZE_PLUS_SENTINELS - 1] = 0;
-    } 
 }

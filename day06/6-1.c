@@ -27,13 +27,11 @@ struct guard find_guard();
 int within_bounds(struct point p);
 void move(struct guard *guard, int *visited);
 void read_input();
-void add_sentinels();
 
 char input[GRID_SIZE_PLUS_SENTINELS][GRID_SIZE_PLUS_SENTINELS];
 
 void main(int argc, char const *argv[]) {
     read_input();
-    add_sentinels();
     struct guard guard = find_guard();
     
     int visited = 1;
@@ -45,9 +43,9 @@ void main(int argc, char const *argv[]) {
 
 struct guard find_guard() {
     for (int i = 1; i <= GRID_SIZE; i++) {
-        for (int j = 1; j < GRID_SIZE; j++) {
+        for (int j = 1; j <= GRID_SIZE; j++) {
             if (input[i][j] == '^')
-                return (struct guard) { .facing = UP, .p = (struct point) { .x = j, .y = i } };
+                return (struct guard) { .p = (struct point) { .x = j, .y = i } };
         }
     }
 }
@@ -84,13 +82,4 @@ void read_input() {
         fgets(input[i + 1] + 1, GRID_SIZE + 2, fptr);
     }
     fclose(fptr);
-}
-
-void add_sentinels() {
-    for (int i = 0; i < GRID_SIZE_PLUS_SENTINELS; i++) {
-        input[0][i] = 0;
-        input[GRID_SIZE_PLUS_SENTINELS - 1][i] = 0;
-        input[i][0] = 0;
-        input[i][GRID_SIZE_PLUS_SENTINELS - 1] = 0;
-    } 
 }

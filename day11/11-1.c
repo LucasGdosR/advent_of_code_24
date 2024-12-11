@@ -15,7 +15,7 @@ struct stone {
 struct arena {
     struct stone stones[MAX_STONES];
     __uint32_t alloc_pos;
-}
+};
 
 void blink(__uint32_t stone_ptr, struct arena *arena) {
     __uint64_t num = arena->stones[stone_ptr].num;
@@ -28,8 +28,8 @@ void blink(__uint32_t stone_ptr, struct arena *arena) {
         } else {
             __uint64_t divisor = pow(10, num_of_digits >> 1);
             struct stone left_stone;
-            __uint64_t left_stone.num = stone.num / divisor;
-            arena->stones[stone_ptr].num = stone.num % divisor;
+            left_stone.num = num / divisor;
+            arena->stones[stone_ptr].num = num % divisor;
 
             __uint32_t prev = arena->stones[stone_ptr].prev;
             arena->stones[prev].next = arena->alloc_pos;
@@ -55,7 +55,7 @@ void main(int argc, char const *argv[])
     for (__uint8_t i = 0; i < (sizeof(input_stones) / sizeof(__uint16_t)); i++) {
         arena.stones[arena.alloc_pos] = (struct stone) { .num = input_stones[i], .prev = prev, .next = SENTINEL_TAIL };
         arena.stones[prev].next = arena.alloc_pos;
-        prev = arena.allos_pos++;
+        prev = arena.alloc_pos++;
     }}
     
     // Simulation

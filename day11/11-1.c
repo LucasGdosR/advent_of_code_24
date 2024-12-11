@@ -43,7 +43,7 @@ void blink(__uint32_t stone_ptr, struct arena *arena) {
 
 void main(int argc, char const *argv[])
 {
-    __uint16_t input_stones[] = { 125, 17 };
+    __uint32_t input_stones[] = { 125, 17 };
 
     // Init arena with sentinels
     struct arena arena;
@@ -52,7 +52,7 @@ void main(int argc, char const *argv[])
 
     // Init linked list with input
     {__uint32_t prev = SENTINEL_HEAD;
-    for (__uint8_t i = 0; i < (sizeof(input_stones) / sizeof(__uint16_t)); i++) {
+    for (__uint8_t i = 0; i < (sizeof(input_stones) / sizeof(__uint32_t)); i++) {
         arena.stones[arena.alloc_pos] = (struct stone) { .num = input_stones[i], .prev = prev, .next = SENTINEL_TAIL };
         arena.stones[prev].next = arena.alloc_pos;
         prev = arena.alloc_pos++;

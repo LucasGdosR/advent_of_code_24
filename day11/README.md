@@ -10,7 +10,7 @@ I modeled the problem after the question and made a doubly-linked list with two 
 - Logarithm and exponential math for manipulating decimal digits in an integer.
 
 Part 2:
-I only cared about the count of stones, which is what was being asked. This allowed me to use memoization to cache the count that a stone eventually should get to.
+I only cared about the stone count, which is what was being asked. This allowed me to use memoization to cache the count that a stone eventually should get to.
 - Memoization implementation;
 - Same math.
 

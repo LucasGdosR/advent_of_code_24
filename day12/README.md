@@ -1,4 +1,5 @@
 Main takeaways:
+
 Part 1:
 - Graph search finding components;
 - Calculating the perimeter of a graph;

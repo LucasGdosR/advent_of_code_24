@@ -11,8 +11,8 @@ I modeled the problem after the question and made a doubly-linked list with two 
 
 Part 2:
 I only cared about the stone count, which is what was being asked. This allowed me to use memoization to cache the count that a stone eventually should get to.
-- Memoization implementation;
+- Memoization implementation using a chained hash table;
+- Cool macros;
+- Use of a static arena for the chained hash table, avoiding rehashing the whole table when it becomes too full, and ensuring better cache locality for the linked lists;
+- `blink_n_times` has a single point of exit, which is handy for profiling and stuff. I still think it's less readable than early returning, but it can be useful;
 - Same math.
-
-TODO:
-C version of part 2. Basically implement a hash table for two numbers as keys.

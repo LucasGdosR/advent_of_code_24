@@ -7,46 +7,45 @@
 #define EPSILON 0.001
 #define CORRECTION 10000000000000
 
-typedef __uint8_t u8;
-typedef __uint64_t u64;
+typedef __int16_t i16;
+typedef __int64_t i64;
 
-u64 calc_cost(u8 ax, u8 ay, u8 bx, u8 by, u64 px, u64 py);
-void read_input(u8 *ax, u8 *ay, u8 *bx, u8 *by, u64 *px, u64 *py);
+i64 calc_cost(i16 ax, i16 ay, i16 bx, i16 by, i64 px, i64 py);
+void read_input(i16 *ax, i16 *ay, i16 *bx, i16 *by, i64 *px, i64 *py);
 
 void main(int argc, char const *argv[])
 {
-    u8 ax[ENTRIES], ay[ENTRIES], bx[ENTRIES], by[ENTRIES];
-    u64 px[ENTRIES], py[ENTRIES];
+    i16 ax[ENTRIES], ay[ENTRIES], bx[ENTRIES], by[ENTRIES];
+    i64 px[ENTRIES], py[ENTRIES];
     read_input(ax, ay, bx, by, px, py);
 
-    u64 tokens = 0;
+    i64 tokens = 0;
     for (short i = 0; i < ENTRIES; i++) {
         tokens += calc_cost(ax[i], ay[i], bx[i], by[i], px[i] + CORRECTION, py[i] + CORRECTION);
     }
     printf("Tokens necessary: %ld\n", tokens);
 }
 
-u64 calc_cost(u8 ax, u8 ay, u8 bx, u8 by, u64 px, u64 py) {
+i64 calc_cost(i16 ax, i16 ay, i16 bx, i16 by, i64 px, i64 py) {
     double denominator = ax*by - bx*ay;
     double a_pressed = (px*by - bx*py) / denominator;
     double b_pressed = (ax*py - ay*px) / denominator;
-    u8 impossible = (fabs(a_pressed - round(a_pressed)) > EPSILON)
+    i16 impossible = (fabs(a_pressed - round(a_pressed)) > EPSILON)
                  || (fabs(b_pressed - round(b_pressed)) > EPSILON);
     return impossible ? 0 : (round(a_pressed) * A_COST) + (round(b_pressed) * B_COST);
 }
 
-void read_input(u8 *ax, u8 *ay, u8 *bx, u8 *by, u64 *px, u64 *py) {
+void read_input(i16 *ax, i16 *ay, i16 *bx, i16 *by, i64 *px, i64 *py) {
     FILE *fptr = fopen("13-input", "r");
     char buffer[32];
     for(short i = 0; i < ENTRIES; i++) {
-        fgets(buffer, 32, fptr);
-        sscanf(buffer, "Button A: X+%d, Y+%d", &ax[i], &ay[i]);
-        fgets(buffer, 32, fptr);
-        sscanf(buffer, "Button B: X+%d, Y+%d", &bx[i], &by[i]);
-        fgets(buffer, 32, fptr);
-        sscanf(buffer, "Prize: X+%d, Y+%d", &px[i], &py[i]);
-        if (i != ENTRIES -1) {
-            fgets(buffer, 32, fptr);
-        }
+        fgets(buffer, sizeof(buffer), fptr);
+        sscanf(buffer, "Button A: X+%hd, Y+%hd", &ax[i], &ay[i]);
+        fgets(buffer, sizeof(buffer), fptr);
+        sscanf(buffer, "Button B: X+%hd, Y+%hd", &bx[i], &by[i]);
+        fgets(buffer, sizeof(buffer), fptr);
+        sscanf(buffer, "Prize: X=%ld, Y=%ld", &px[i], &py[i]);        
+        fgets(buffer, sizeof(buffer), fptr);
     }
+    fclose(fptr);
 }

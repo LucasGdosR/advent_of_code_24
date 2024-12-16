@@ -4,15 +4,16 @@
 #define GRID_SIZE 140
 #define GRID_SIZE_PLUS_SENTINELS GRID_SIZE + 2
 #define ARENA_UPPER_BOUND (GRID_SIZE * GRID_SIZE)
-#define REGION_ID (ARENA_UPPER_BOUND - 1)
 #define REGION_SIZE 0
+#define true 1
 
 typedef __uint8_t u8;
+typedef u8 bool;
 typedef __uint16_t u16;
 typedef __uint32_t u32;
 
 char garden[GRID_SIZE_PLUS_SENTINELS][GRID_SIZE_PLUS_SENTINELS];
-u16 visited[GRID_SIZE_PLUS_SENTINELS][GRID_SIZE_PLUS_SENTINELS];
+bool visited[GRID_SIZE_PLUS_SENTINELS][GRID_SIZE_PLUS_SENTINELS];
 
 typedef struct {
     u8 i;
@@ -22,7 +23,6 @@ typedef struct {
 union region {
     p p;
     u16 size;
-    u16 id;
 };
 
 void expand_region(char plant, u8 i, u8 j, union region region[ARENA_UPPER_BOUND]);
@@ -31,13 +31,12 @@ u32 calculate_perimeter(union region region[ARENA_UPPER_BOUND]);
 uint budget_garden_fences() {
     u32 budget = 0;
     union region region[ARENA_UPPER_BOUND];
-    region[REGION_ID].id = 0;
     for (u8 i = 1; i < GRID_SIZE_PLUS_SENTINELS - 1; i++)
     {
         for (u8 j = 1; j < GRID_SIZE_PLUS_SENTINELS - 1; j++)
         {
             if (!visited[i][j]) {
-                visited[i][j] = ++region[REGION_ID].id;
+                visited[i][j] = true;
                 region[REGION_SIZE].size = 0;
                 region[++(region[REGION_SIZE].size)].p = (p) { .i = i, .j = j };
                 expand_region(garden[i][j], i, j, region);
@@ -52,9 +51,9 @@ uint budget_garden_fences() {
 void expand_region(char plant, u8 i, u8 j, union region region[ARENA_UPPER_BOUND]) {
 #define CHECK_NEIGHBOR(di, dj) \
     if (garden[i + (di)][j + (dj)] == plant \
-    && (visited[i + (di)][j + (dj)] != region[REGION_ID].id)) \
+    && (!visited[i + (di)][j + (dj)])) \
     { \
-        visited[i + (di)][j + (dj)] = region[REGION_ID].id; \
+        visited[i + (di)][j + (dj)] = true; \
         region[++(region[REGION_SIZE].size)].p = (p) { .i = i + (di), .j = j + (dj) }; \
         expand_region(plant, i + (di), j + (dj), region); \
     }
@@ -67,15 +66,15 @@ void expand_region(char plant, u8 i, u8 j, union region region[ARENA_UPPER_BOUND
 u32 calculate_perimeter(union region region[ARENA_UPPER_BOUND]) {
     u32 perimeter = 0;
     for (u16 i = 1,
-             id = region[REGION_ID].id,
+             plant = garden[region[1].p.i][region[1].p.j],
              size = region[REGION_SIZE].size;
         i <= size; i++)
     {
         p p = region[i].p;
-        perimeter += (visited[p.i + 1][p.j] != id)
-                   + (visited[p.i - 1][p.j] != id)
-                   + (visited[p.i][p.j + 1] != id)
-                   + (visited[p.i][p.j - 1] != id);
+        perimeter += (garden[p.i + 1][p.j] != plant)
+                   + (garden[p.i - 1][p.j] != plant)
+                   + (garden[p.i][p.j + 1] != plant)
+                   + (garden[p.i][p.j - 1] != plant);
     }
     return perimeter;
 }

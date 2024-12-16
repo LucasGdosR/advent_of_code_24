@@ -3,8 +3,8 @@ Main takeaways:
 Part 1:
 - Graph search finding components;
 - Calculating the perimeter of a graph;
-- I implemented a union that allowed me to use a single array to store a generation number (`REGION_ID`), the array's size (`REGION_SIZE`), and a collection of elements (using the size to determine where to store). This array is also an arena, and resetting the element at `REGION_SIZE` is akin to freeing a stack frame and starting anew, with no need to clear all the memory contents or free and allocate new memory;
-- Using generations allowed me to use a grid of "booleans" for the entire dataset, while also keeping information about who is a neighbor to whom;
+- I implemented a union that allowed me to use a single array to store the array's size at using a 16-bit uint the header (`REGION_SIZE`), and a collection of points with 2 8-bit uint coordinates (using the size to determine where to store). This array is also an arena, and resetting the element at `REGION_SIZE` is akin to freeing a stack frame and starting anew, with no need to clear all the memory contents or free and allocate new memory;
+- Since all nodes will eventually be visited, using a matrix the same size as the `garden` for marking visited nodes is a better alternative than a hash set;
 - Macro for succintly dealing with multiple neighbors.
 
 Part 2:

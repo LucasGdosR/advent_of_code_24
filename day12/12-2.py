@@ -7,12 +7,6 @@ NEIGHBORS = ((-1, 0),
        (0, -1),    (0, 1),
              ( 1, 0))
 
-EIGHT_DIRECTIONS = (
-    (-1, -1), (-1, 0), (-1, 1),
-    ( 0, -1),          ( 0, 1),
-    ( 1, -1), ( 1, 0), ( 1, 1)
-)
-
 def budget_garden_fences(garden: str) -> int:
     garden = garden.splitlines()
     visited = [[False for _ in row] for row in garden]
@@ -47,7 +41,6 @@ def budget_garden_fences(garden: str) -> int:
                 expand_region(plant, i, j, region)
                 area = len(region)
                 sides = calculate_sides(region)
-                print(f'Plant: {plant}; Area: {area}; Sides: {sides}')
                 budget += area * sides
                 
     return budget

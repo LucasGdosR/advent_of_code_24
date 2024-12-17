@@ -1,25 +1,24 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #define A 4
 #define B 5
 #define C 6
 #define IP_INC 2
-#define len(program) (sizeof(program) / sizeof(__uint_8))
+#define len(program) (sizeof(program) / sizeof(__uint8_t))
 
 struct arr {
     __uint64_t elements[32];
     __uint8_t size;
 };
 
-__uint64_t combo_operands[] = { 0, 1, 2, 3, 729, 0, 0 };
-__uint8_t program[] = { 0,1,5,4,3,0 };
+__uint64_t combo_operands[] = { 0, 1, 2, 3, 2024, 0, 0 };
+__uint8_t program[] = { 0,3,5,4,3,0 };
 __int8_t IP = 0;
 __uint8_t output[len(program)];
 __uint8_t output_i;
 
 void adv(__uint8_t operand) {
-    combo_operands[A] /= 1 << combo_operands[operand];
+    combo_operands[A] /= 1ULL << combo_operands[operand];
 }
     
 void bxl(__uint8_t operand) {
@@ -43,11 +42,11 @@ void out(__uint8_t operand) {
 }
 
 void bdv(__uint8_t operand) {
-    combo_operands[B] = combo_operands[A] / (1 << combo_operands[operand]);
+    combo_operands[B] = combo_operands[A] / (1ULL << combo_operands[operand]);
 }
 
 void cdv(__uint8_t operand) {
-    combo_operands[C] = combo_operands[A] / (1 << combo_operands[operand]);
+    combo_operands[C] = combo_operands[A] / (1ULL << combo_operands[operand]);
 }
 
 void execute_program(__uint64_t a_register) {
@@ -77,17 +76,18 @@ void execute_program(__uint64_t a_register) {
 
 void main(int argc, char const *argv[])
 {
-    __uint64_t max_a = (1 << (len(program) * 3)) - 1;
+    __uint64_t max_a = (1ULL << (len(program) * 3)) - 1;
     __uint64_t min_a = (max_a >> 3) + 1;
     struct arr candidates = (struct arr) { .elements = { min_a }, .size = 1 };
 
     for (__uint8_t i = 1; i <= len(program); i++)
     {
-        struct arr new_candidates = {};
-        __uint64_t step = 1 << ((len(program) - i) * 3);
-        for (__uint8_t i = 0; i < candidates.size; i++)
+        struct arr new_candidates;
+        new_candidates.size = 0;
+        __uint64_t step = 1ULL << ((len(program) - i) * 3);
+        for (__uint8_t j = 0; j < candidates.size; j++)
         {
-            __uint64_t c = candidates[i];
+            __uint64_t c = candidates.elements[j];
             for (__uint64_t a_register = c; a_register < c + 7 * step + 1; a_register += step)
             {
                 execute_program(a_register);
@@ -97,7 +97,7 @@ void main(int argc, char const *argv[])
                 }
             }
         }
-        candidates = new_candidates; // does this mess with "elements"?
+        candidates = new_candidates;
     }
-    printf("Register A uncorrupted value: %ld\n", candidates[0]);
+    printf("Register A uncorrupted value: %ld\n", candidates.elements[0]);
 }

@@ -5,4 +5,5 @@ Part 1:
 
 Part 2:
 - Recursive check for vertical movement validity ("depth first search");
-- Iterative level movement with a queue ordering levels ("breadth first search").
+- Iterative level movement with a queue ordering levels ("breadth first search");
+- Deque implementation in C with a circular buffer that uses a bit mask for wrapping around.

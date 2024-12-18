@@ -3,7 +3,7 @@
 #define MAZE_SIZE 141
 #define HEAP_SIZE 1024
 #define HEAP_START 1
-#define SET_SIZE (((MAZE_SIZE - 1) << 8) | (MAZE_SIZE - 1))
+#define SET_SIZE MAZE_SIZE - 2
 
 typedef signed   char  i8 ;
 typedef unsigned char  u8 ;
@@ -39,7 +39,7 @@ struct heap {
 u32 find_shortest_path(char maze[MAZE_SIZE][MAZE_SIZE + 2], struct heap *h);
 struct p find_start(char maze[MAZE_SIZE][MAZE_SIZE + 2]);
 
-u8 set_add(u8 set[SET_SIZE], struct state state);
+u8 set_add(u8 set[SET_SIZE][SET_SIZE], struct state state);
 
 struct path heap_pop(struct heap *h);
 void heap_insert(struct heap *h, struct path p);
@@ -58,7 +58,7 @@ void main(int argc, char const *argv[])
 }
 
 u32 find_shortest_path(char maze[MAZE_SIZE][MAZE_SIZE + 2], struct heap *h) {
-    u8 visited[SET_SIZE] = {};
+    u8 visited[SET_SIZE][SET_SIZE] = {};
     set_add(visited, h->paths[HEAP_START].s);
 
     while (h->size)
@@ -94,11 +94,10 @@ u32 find_shortest_path(char maze[MAZE_SIZE][MAZE_SIZE + 2], struct heap *h) {
     }
 }
 
-u8 set_add(u8 set[SET_SIZE], struct state state) {
-    u16 index = ((u16)state.p.i << 8) | state.p.j;
+u8 set_add(u8 set[SET_SIZE][SET_SIZE], struct state state) {
     u8 new_content = 1 << state.f;
-    u8 old_content = set[index];
-    set[index] |= new_content;
+    u8 old_content = set[state.p.i - 1][state.p.j - 1];
+    set[state.p.i - 1][state.p.j - 1] |= new_content;
     return !(new_content & old_content);
 }
 

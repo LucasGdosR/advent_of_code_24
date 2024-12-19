@@ -1,22 +1,17 @@
-#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
-#define INPUT_1_SIZE 447
-#define INPUT_2_NUM 400
-#define INPUT_2_LEN 62
-#define ARENA_CAPACITY 3000
+#define SOURCE_LEN 2904
+#define TOWELS_NUM 447
+#define TOWEL_MAX_LEN 9
+#define PATTERNS_NUM 400
+#define PATTERNS_LEN 62
+#define ARENA_CAPACITY 65535
+#define SENTINEL ARENA_CAPACITY
 #define MAP_SIZE (ARENA_CAPACITY * 2)
 
 typedef long i64;
-
-struct available_towels {
-    char *towels;
-    short size;
-};
 
 struct node {
     char *key;
@@ -31,47 +26,74 @@ struct hash_map {
     unsigned short size;
 };
 
-i64 count_arrangements(char *pattern, struct hash_map *memo);
+struct towel {
+    char str[TOWEL_MAX_LEN];
+    char len;
+};
+
+i64 count_arrangements(char *pattern, struct towel towels[TOWELS_NUM], struct hash_map *memo);
+char startswith(char *pattern, struct towel *towel);
 
 void add(struct hash_map *map, char *key, i64 val);
 i64 get(struct hash_map *map, char *key);
 
-struct available_towels read_input(char patterns[INPUT_2_NUM][INPUT_2_LEN]);
+void read_input(char patterns[PATTERNS_NUM][PATTERNS_LEN], struct towel towels[TOWELS_NUM]);
 
 void main(int argc, char const *argv[])
 {
-    char patterns[INPUT_2_NUM][INPUT_2_LEN];
-    struct available_towels t = read_input(patterns);
-
+    char patterns[PATTERNS_NUM][PATTERNS_LEN];
+    struct towel towels[TOWELS_NUM];
+    read_input(patterns, towels);
+    
     struct hash_map memo;
     memo.size = 0;
     memset(memo.lists, 0, sizeof(memo.lists));
-
-    add(&memo, "", 1);
-
+    add(&memo, "\n", 1);
+    add(&memo, "\0", 1);
+    
     short possible = 0;
     i64 total = 0;
-    for (short i = 0; i < INPUT_2_NUM; i++)
+    for (short i = 0; i < PATTERNS_NUM; i++)
     {
-        i64 ways_to_arrange = count_arrangements((char*)patterns[i], t, &memo);
+        i64 ways_to_arrange = count_arrangements((char*)patterns[i], towels, &memo);
         total += ways_to_arrange;
         possible += !!ways_to_arrange;
     }
     // munmap(t.towels); would be a waste
-    printf("Patterns that can be matched: %hd\n Ways to match those patterns: %ld\n", possible, total);
+    printf("Patterns that can be matched: %hd\nWays to match those patterns: %ld\n", possible, total);
 }
 
-i64 count_arrangements(char *pattern, struct available_towels t, struct hash_map *memo) {
+i64 count_arrangements(char *pattern, struct towel towels[TOWELS_NUM], struct hash_map *memo) {
     i64 total = get(memo, pattern);
     if (total < 0) {
-        total = // sum(count_arrangements(pattern[len(towel):]) for towel in available_towels if pattern.startswith(towel));
+        total = 0;
+        for (short i = 0; i < TOWELS_NUM; i++)
+        {
+            struct towel *towel = &towels[i];
+            if (startswith(pattern, towel)) {
+                total += count_arrangements(pattern + towel->len, towels, memo);
+            }
+        }
         add(memo, pattern, total);
     }
     return total;
 }
 
+char startswith(char *pattern, struct towel *towel) {
+    char starts = 1;
+    for (char i = 0; i < towel->len; i++)
+    {
+        if (pattern[i] != towel->str[i])
+        {
+            starts = 0;
+            break;
+        }
+    }
+    return starts;
+}
+
 unsigned short hash(char *key) {
-    i64 h = *key;
+    unsigned long h = *key;
     while (*key++ != '\0')
     {
         h = h * 31 + *key;
@@ -82,13 +104,13 @@ unsigned short hash(char *key) {
 void add(struct hash_map *map, char *key, i64 val) {
     if (map->size == ARENA_CAPACITY) {
         printf("arena overflowed");
-        exit(1); // include sys
+        exit(1);
     }
-
+    
     unsigned short h = hash(key);
     struct node *head = map->lists[h];
     if (head == NULL) {
-        map->arena[map->size] = (struct node) { .key=key, .val=val, .next=NULL, .last=map->size };
+        map->arena[map->size] = (struct node) { .key=key, .val=val, .next=SENTINEL, .last=map->size };
         map->lists[h] = &map->arena[map->size++];
     } else {
         // Append to the end of the list.
@@ -96,7 +118,7 @@ void add(struct hash_map *map, char *key, i64 val) {
         // and more frequently accessed entries require less. Optimize for the common case.
         map->arena[head->last].next = map->size;
         head->last = map->size;
-        map->arena[map->size++] = (struct node) { .key=key, .val=val, .next=NULL, .last=map->size };
+        map->arena[map->size++] = (struct node) { .key=key, .val=val, .next=SENTINEL, .last=map->size };
     }
 }
 
@@ -109,24 +131,30 @@ i64 get(struct hash_map *map, char *key) {
             val = node->val;
             break;
         }
-        // advance list
+        if (node->next == SENTINEL) {
+            break;
+        }
+        node = &map->arena[node->next];
     }
     return val;
 }
 
-struct available_towels read_input(char patterns[INPUT_2_NUM][INPUT_2_LEN]) {
-    FILE *f = fopen("16-input-patterns", "r");
-    for (short i = 0; i < INPUT_2_LEN; i++)
-        fgets(patterns[i], INPUT_2_LEN, fptr);
-    fclose(fptr);
+void read_input(char patterns[PATTERNS_NUM][PATTERNS_LEN], struct towel towels[TOWELS_NUM]) {
+    FILE *f = fopen("19-input-target", "r");
+    for (short i = 0; i < PATTERNS_NUM; i++)
+        fgets(patterns[i], PATTERNS_LEN, f);
+    fclose(f);
 
-    struct available_towels t;
-    int fd = open("16-input-available", O_RDONLY);
-    struct stat sb;
-    fstat(fd, &sb);
-    t.size = sb.st_size;
-    t.towels = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd);
+    f = fopen("19-input-source", "r");
+    char buffer[SOURCE_LEN];
+    fgets(buffer, SOURCE_LEN, f);
+    fclose(f);
 
-    return t;
+    char *token = strtok(buffer, ", ");
+    for (short i = 0; i < TOWELS_NUM; i++)
+    {
+        strcpy(towels[i].str, token);
+        towels[i].len = strlen(token);
+        token = strtok(NULL, ", ");
+    }
 }

@@ -15,13 +15,13 @@ def iterative_dfs(i, j, steps):
                 path[(i+di, j+dj)] = steps + 1
                 stack.append((i+di, j+dj, steps+1))
 
+def find_cheats(i, j, steps):
+    return sum(1 for di, dj in TWO_PS_CHEATING_JUMPS if 0 <= i+di < len(racetrack) and 0 <= j+dj < len(racetrack[0]) and (i+di, j+dj) in path and path[(i+di, j+dj)] >= steps + 102)
+
 for i, row in enumerate(racetrack):
     for j, c in enumerate(row):
         if c == 'S':
             path[(i, j)] = 0
             iterative_dfs(i, j, 0)
-
-def find_cheats(i, j, steps):
-    return sum(1 for di, dj in TWO_PS_CHEATING_JUMPS if 0 <= i+di < len(racetrack) and 0 <= j+dj < len(racetrack[0]) and (i+di, j+dj) in path and path[(i+di, j+dj)] >= steps + 102)
-    
-print(sum(find_cheats(i, j, steps) for (i, j), steps in path.items()))
+            print(sum(find_cheats(i, j, steps) for (i, j), steps in path.items()))
+            exit()

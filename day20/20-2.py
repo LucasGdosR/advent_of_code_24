@@ -28,20 +28,20 @@ from collections import deque
 
 def depth_limited_bfs(si, sj, steps):
     q = deque()
-    q.append(((si, sj), 0))
-    visited = set(((si, sj)))
-    while q:
-        (ei, ej), cheating_steps = q.popleft()
-        if cheating_steps < 20:
+    q.append(((si, sj)))
+    visited = set((si, sj))
+    for cheating_steps in range(20):
+        for _ in range(len(q)):
+            (ei, ej) = q.popleft()
             for di, dj in DIRECTIONS:
-                dst = (ei+di, ej+dj)
+                dst = (ei + di, ej + dj)
                 if dst not in visited:
                     visited.add(dst)
-                    q.append((dst, cheating_steps + 1))
+                    q.append(dst)
                     if path.get(dst, 0) >= steps + 100 + cheating_steps:
                         great_cheats.add(((si, sj), dst))
 
 for (i, j), steps in path.items():
     depth_limited_bfs(i, j, steps)
-    
-print(len(great_cheats))
+
+print(len(great_cheats), end - start)

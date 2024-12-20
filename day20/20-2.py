@@ -32,19 +32,16 @@ def depth_limited_bfs(si, sj, steps):
     visited = set(((si, sj)))
     while q:
         (ei, ej), cheating_steps = q.popleft()
-        for di, dj in DIRECTIONS:
-            dst = (ei+di, ej+dj)
-            if (cheating_steps < 20 and
-                0 <= ei+di < len(racetrack) and 
-                0 <= ej+dj < len(racetrack[0]) and
-                dst not in visited
-            ):
-                visited.add(dst)
-                q.append((dst, cheating_steps + 1))
-                if dst in path and path[dst] >= steps + 100 + cheating_steps:
-                    great_cheats.add(((si, sj), dst))
-    
+        if cheating_steps < 20:
+            for di, dj in DIRECTIONS:
+                dst = (ei+di, ej+dj)
+                if dst not in visited:
+                    visited.add(dst)
+                    q.append((dst, cheating_steps + 1))
+                    if path.get(dst, 0) >= steps + 100 + cheating_steps:
+                        great_cheats.add(((si, sj), dst))
+
 for (i, j), steps in path.items():
     depth_limited_bfs(i, j, steps)
-
+    
 print(len(great_cheats))

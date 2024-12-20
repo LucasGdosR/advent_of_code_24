@@ -7,4 +7,4 @@ Main takeaways:
 
 2. Part 2:
 - Depth-limited breadth-first search;
-- Playing with condition checking was enough to speed up the code by 15%. I thought this was remarkable.
+- Playing with condition checking and `cheating_steps` incrementing was enough to speed up the code by 100%. I thought this was remarkable, although it made the code slightly less readable.

@@ -11,4 +11,10 @@ Main takeaways:
 
 2. Part 2:
 - Depth-limited breadth-first search;
-- Python: playing with condition checking and `cheating_steps` incrementing was enough to speed up the code by 100%. I thought this was remarkable, although it made the code slightly less readable.
+- Circular buffer queue implementation that calculates size based on start/end pointers;
+- Chained hash set implementation on top of an arena with 0 collisions for the given input;
+- Python: playing with condition checking and `cheating_steps` incrementing was enough to speed up the code by 100%. I thought this was remarkable, although it made the code slightly less readable;
+- C: this needed a bunch of sentinels to avoid checking the boundaries, so I added more generic sentinel logic based on macros;
+- C: doing some math allowed me to come up with precise limits for data structures. Knowing queues need at most 80 elements, and hash sets need at most 841 elements, was calculated by hand;
+- C: trying different hash set sizes and hash functions led to massive reductions in collisions. I was able to reach 0 collisions for my personal input with this implementation, using a prime number for the size, and making each coordinate not interfere with each other;
+- C: instead of incrementing and decrementing the queue's size with every enqueue/dequeue operation, I calculated it out of the start/end pointers. This is handy when asking for the length isn't as frequent as enqueuing and dequeuing.

@@ -4,9 +4,9 @@ input = '''1
 2024'''.splitlines()
 
 def random(seed):
-    seed = (seed ^ (seed << 6)) % 16777216
-    seed = (seed ^ (seed >> 5)) % 16777216
-    return (seed ^ (seed << 11)) % 16777216
+    seed = (seed ^ (seed << 6)) & 0xFFFFFF
+    seed = (seed ^ (seed >> 5)) & 0xFFFFFF
+    return (seed ^ (seed << 11)) & 0xFFFFFF
     
 total = 0
 for seed in input:

@@ -47,15 +47,12 @@ void main(int argc, char const *argv[])
             seen_sequences[h] = 1;
         }
     }
+    
     short max_profit = 0;
     for (int i = 0; i < POSSIBLE_SEQUENCES; i++)
     {
         max_profit = max_profit >= profits[i] ? max_profit : profits[i];
-        if (profits[i] == 1450) {
-            printf("Hash: %d\n", i);
-        }
     }
-    
     printf("Maximum possible profit: %hd\n", max_profit);
 }
 

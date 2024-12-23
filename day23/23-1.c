@@ -8,6 +8,7 @@ typedef unsigned char u8;
 
 short intersection(u8 **t_neighbors, u8 ** n_neighbors);
 
+// TODO: make these pointers. Instantiate arrays lazily, like a hierarchical page table.
 u8 adj_lists[GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE];
 
 void read_input() {

@@ -38,17 +38,17 @@ void main(int argc, char const *argv[])
     short three_sets = 0;
     for (u8 i = 0; i < GRAPH_SIZE; i++)
     {
-        u8 **t_neighbors = adj_lists['t' - 'a'][i];
+        u8 **t_neighbors = (u8**)adj_lists['t' - 'a'][i];
         for (u8 j = 0; j < GRAPH_SIZE; j++)
         {
             for (u8 k = 0; k < GRAPH_SIZE; k++)
             {
-                u8 **n_neighbors = adj_lists[j][k];
+                u8 **n_neighbors = (u8**)adj_lists[j][k];
                 three_sets += intersection(t_neighbors, n_neighbors);
             }   
         }
     }
-    printf("t Three set count: %hd", three_sets);
+    printf("t Three set count: %hd", three_sets >> 1);
 }
 
 short intersection(u8 **t_neighbors, u8 ** n_neighbors) {

@@ -4,7 +4,11 @@
 #define LINE_LENGTH 7
 #define GRAPH_SIZE ('z' - 'a' + 1)
 
-adj_lists[GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE];
+typedef unsigned char u8;
+
+short intersection(u8 **t_neighbors, u8 ** n_neighbors);
+
+u8 adj_lists[GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE];
 
 void read_input() {
     FILE *f = fopen("23-input", "r");
@@ -31,15 +35,30 @@ void read_input() {
 void main(int argc, char const *argv[])
 {
     read_input();
-/*
-three_sets = set()
-for node in adj_lists:
-    if node[0] == 't':
-        t_neighbors = adj_lists[node]
-        for n in t_neighbors:
-            final_computers = t_neighbors.intersection(adj_lists[n])
-            for third_computer in final_computers:
-                three_sets.add(tuple(sorted((node, n, third_computer))))
-print(len(three_sets))
-*/
+    short three_sets = 0;
+    for (u8 i = 0; i < GRAPH_SIZE; i++)
+    {
+        u8 **t_neighbors = adj_lists['t' - 'a'][i];
+        for (u8 j = 0; j < GRAPH_SIZE; j++)
+        {
+            for (u8 k = 0; k < GRAPH_SIZE; k++)
+            {
+                u8 **n_neighbors = adj_lists[j][k];
+                three_sets += intersection(t_neighbors, n_neighbors);
+            }   
+        }
+    }
+    printf("t Three set count: %hd", three_sets);
+}
+
+short intersection(u8 **t_neighbors, u8 ** n_neighbors) {
+    short count = 0;
+    for (u8 i = 0; i < GRAPH_SIZE; i++)
+    {
+        for (u8 j = 0; j < GRAPH_SIZE; j++)
+        {
+            count += t_neighbors[i][j] & n_neighbors[i][j];
+        }
+    }
+    return count;
 }

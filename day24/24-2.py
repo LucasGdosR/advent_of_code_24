@@ -13,7 +13,7 @@ for rule in initial_rules:
 # Save to a dot file -> python3 24-2.py > graph.dot
 print('digraph G {')
 for e in edges:
-    print(f'\t{e[0]} -> {e[1]} [label="{op}"];')
+    print(f'\t{i} -> {o} [label="{op}"];')
 print('}', end='')
 # Create visualization with
 # dot -Tpng graph.dot -o graph.png

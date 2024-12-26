@@ -4,6 +4,6 @@ This is the first edition of the Advent of Code I participate in. My ***main cha
 ***TO DO***:
 - Day 16: part 2 in C
 - Day 21: part 2 in Python, both in C
-- Day 23: part 2 in C
+- Day 23: both parts in C
 - Day 24: both parts in C
 - Day 25 in C

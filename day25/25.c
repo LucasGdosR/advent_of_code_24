@@ -18,7 +18,7 @@ struct dict {
 };
 
 struct node compress_string_to_arr(char key_or_lock[LOCK_HEIGHT][LINE_LENGTH]);
-char check_overlap(struct node *k, struct node *l);
+char check_overlap(char k[COLS], char l[COLS]);
 
 void read_input(char keys_n_locks[LOCK_QTY][LOCK_HEIGHT][LINE_LENGTH]);
 
@@ -67,7 +67,8 @@ void main(int argc, char const *argv[])
             }
             k = k->next;
         }   
-    } 
+    }
+    printf("Key/lock pairs that must be tried: %hd\n", possible_matches);
 }
 
 struct node compress_string_to_arr(char str_repr[LOCK_HEIGHT][LINE_LENGTH]) {

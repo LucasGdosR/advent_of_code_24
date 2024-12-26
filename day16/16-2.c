@@ -67,7 +67,6 @@ struct path heap_pop(struct heap *h);
 void heap_insert(struct heap *h, struct path p);
 
 void map_insert(struct map *m, struct state k, struct val v);
-u8 map_has(struct map *m, struct state this);
 struct val* map_get(struct map *m, struct state this);
 
 void read_input(char maze[MAZE_SIZE][MAZE_SIZE + 2]);
@@ -110,18 +109,15 @@ void find_shortest_path(char maze[MAZE_SIZE][MAZE_SIZE + 2], struct heap *h, str
         u8 next_i = curr.s.p.i + d.i, next_j = curr.s.p.j + d.j;
         struct state next_state = { .p={ .i=next_i, .j=next_j }, .f=curr.s.f };
 
-        if (!map_has(m, next_state))
+        struct val *v;
+        if ((v = map_get(m, next_state)) == NULL)
         {
-            struct val v = { .prev_neighbors={ curr.s }, .size=1, .score=curr.score + 1 };
-            map_insert(m, next_state, v);
+            struct val new_v = { .prev_neighbors={ curr.s }, .size=1, .score=curr.score + 1 };
+            map_insert(m, next_state, new_v);
         }
-        else
+        else if (v->score == curr.score + 1)
         {
-            struct val *v = map_get(m, next_state);
-            if (v->score == curr.score + 1)
-            {
-                v->prev_neighbors[v->size++] = curr.s;
-            }
+            v->prev_neighbors[v->size++] = curr.s;
         }
 
         char tile = maze[next_i][next_j];
@@ -134,47 +130,24 @@ void find_shortest_path(char maze[MAZE_SIZE][MAZE_SIZE + 2], struct heap *h, str
         }
 
         // Rotating
+        #define TRY_ROTATING if ((v = map_get(m, rotated)) == NULL) \
+        { \
+            struct val new_v = { .prev_neighbors={ curr.s }, .size=1, .score=curr.score + 1000 }; \
+            map_insert(m, rotated, new_v); \
+        } \
+        else if (v->score == curr.score + 1000) \
+        { \
+            v->prev_neighbors[v->size++] = curr.s; \
+        } \
+\
+        if (set_add(visited, rotated)) { \
+            heap_insert(h, (struct path) { .score=curr.score + 1000, .s=rotated }); \
+        }
         struct state rotated = curr.s;
-
         rotated.f = ROTATE_CLOCKWISE[curr.s.f];
-
-        if (!map_has(m, rotated))
-        {
-            struct val v = { .prev_neighbors={ curr.s }, .size=1, .score=curr.score + 1000 };
-            map_insert(m, rotated, v);
-        }
-        else
-        {
-            struct val *v = map_get(m, rotated);
-            if (v->score == curr.score + 1000)
-            {
-                v->prev_neighbors[v->size++] = curr.s;
-            }
-        }
-
-        if (set_add(visited, rotated)) {
-            heap_insert(h, (struct path) { .score=curr.score + 1000, .s=rotated });
-        }
-
+        TRY_ROTATING
         rotated.f = ROTATE_COUNTER_C[curr.s.f];
-
-        if (!map_has(m, rotated))
-        {
-            struct val v = { .prev_neighbors={ curr.s }, .size=1, .score=curr.score + 1000 };
-            map_insert(m, rotated, v);
-        }
-        else
-        {
-            struct val *v = map_get(m, rotated);
-            if (v->score == curr.score + 1000)
-            {
-                v->prev_neighbors[v->size++] = curr.s;
-            }
-        }
-
-        if (set_add(visited, rotated)) {
-            heap_insert(h, (struct path) { .score=curr.score + 1000, .s=rotated });
-        }
+        TRY_ROTATING
     } while (max_score > score);
 }
 
@@ -193,7 +166,7 @@ short count_tiles_in_path(struct map *tile_to_prev_neighbors, struct p end) {
     for (enum Facing f = 0; f < NUM_FACINGS; f++)
     {
         struct state s = { .p=end, .f=f };
-        if (map_has(tile_to_prev_neighbors, s))
+        if (map_get(tile_to_prev_neighbors, s))
         {
             backtrack_tiles(tile_to_prev_neighbors, s, tiles);
         }
@@ -277,42 +250,20 @@ u16 map_hash(struct state k) {
     u64 h1 = (k.p.i * 31415) + 27183;
     u64 h2 = (k.p.j * 27183) + 18979;
     u64 h3 = (k.f * 18979) + 31415;
-    
     u64 hash_value = h1 * 65537 + h2 * 65539 + h3 * 65543;
-    
     hash_value = ((hash_value >> 16) ^ hash_value) * 65537;
-    
     return hash_value % MAP_SIZE;
 }
 
 void map_insert(struct map *m, struct state k, struct val v) {
-    if (m->size == MAP_CAPACITY) {
-        printf("Arena overflowed\n");
-    }
     u16 h = map_hash(k);
     struct node node = { .key=k, .v=v, .next=m->arr[h] };
     m->arena[m->size] = node;
     m->arr[h] = &m->arena[m->size++];
 }
 
-u8 map_has(struct map *m, struct state this) {
-    u16 h = map_hash(this);
-    struct node *node = m->arr[h];
-    while (node)
-    {
-        struct state that = node->key;
-        if ((this.p.i == that.p.i)
-         && (this.p.j == that.p.j)
-         && (this.f == that.f))
-        {
-            return 1;
-        }
-        node = node->next;
-    }
-    return 0;
-}
-
 struct val* map_get(struct map *m, struct state this) {
+    struct val *v = NULL;
     u16 h = map_hash(this);
     struct node *node = m->arr[h];
     while (node)
@@ -322,10 +273,12 @@ struct val* map_get(struct map *m, struct state this) {
          && (this.p.j == that.p.j)
          && (this.f == that.f))
         {
-            return &node->v;
+            v = &node->v;
+            break;
         }
         node = node->next;
     }
+    return v;
 }
 
 void find_start_end(char maze[MAZE_SIZE][MAZE_SIZE + 2], struct p start_end[2]) {

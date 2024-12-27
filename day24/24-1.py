@@ -46,29 +46,26 @@ hwm AND bqk -> z03
 tgd XOR rvg -> z12
 tnw OR pbm -> gnj'''.splitlines()
 
-from collections import defaultdict
-
 state = {}
 for s in initial_state:
     state[s[:3]] = int(s[5])
 
-rules = defaultdict(list)
+rules = {}
 for r in initial_rules:
     i1, op, i2, _, o = r.split()
     op = (lambda a, b: a & b) if (op == 'AND') else (lambda a, b: a | b) if (op == 'OR') else (lambda a, b: a ^ b)
-    rules[(i1, i2)].append((o, op))
+    rules[o] = ((i1, i2, op))
 
-while rules:
-    for (i1, i2), os_and_ops in rules.copy().items():
-        if i1 in state and i2 in state:
-            del rules[(i1, i2)]
-            s1, s2 = state[i1], state[i2]
-            for o, op in os_and_ops:
-                state[o] = op(s1, s2)
+def dfs(o):
+    i1, i2, op = rules[o]
+    i1 = state[i1] if i1 in state else dfs(i1)
+    i2 = state[i2] if i2 in state else dfs(i2)
+    state[o] = op(i1, i2)
+    return state[o]
 
 total = 0
-for s in state:
-    if s[0] == 'z':
-        total |= state[s] << int(s[1:])
+for o in rules.keys():
+    if o[0] == 'z':
+        total |= dfs(o) << int(o[1:])
 
 print(total)

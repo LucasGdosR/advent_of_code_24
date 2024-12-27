@@ -24,7 +24,6 @@ struct three_sets {
     short size;
 };
 
-// TODO: make these pointers. Instantiate arrays lazily, like a hierarchical page table.
 u8 adj_lists[GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE];
 
 void read_input() {
@@ -51,45 +50,49 @@ void read_input() {
 
 // this is smaller: -1
 // that is smaller:  1
-u8 compare_pc(struct pc this, struct pc that) {
-    u8 result;
-    if (this.a < that.a)      result = -1;
-    else if (this.a > that.a) result =  1;
-    else if (this.b < that.b) result = -1;
-    else if (this.b > that.b) result =  1;
-    else printf("Impossible, no pc should be connected to itself.\n");
-    return result;
+signed char compare_pc(struct pc this, struct pc that) {
+    return (((short)this.a) * GRAPH_SIZE + this.b) < (((short)that.a) * GRAPH_SIZE + that.b) ? -1 : 1;
 }
 
 struct set_of_three make_set(struct pc foo, struct pc bar, struct pc baz) {
-    u8 cmp_foo_bar = compare_pc(foo, bar);
-    u8 cmp_foo_baz = compare_pc(foo, baz);
-    u8 cmp_bar_baz = compare_pc(bar, baz);
-
     struct set_of_three set;
-    if (compare_pc(foo, bar) < 0)
-        if (compare_pc(foo, baz) < 0)
-            if (compare_pc(bar, baz) < 0)
+    if (compare_pc(foo, bar) < 0){
+        if (compare_pc(foo, baz) < 0){
+            if (compare_pc(bar, baz) < 0) {
                 set = (struct set_of_three) { .small=foo, .middle=bar, .large=baz };
-            else
+            } else {
                 set = (struct set_of_three) { .small=foo, .middle=baz, .large=bar };
-        else
+            }
+        } else {
             set = (struct set_of_three) { .small=baz, .middle=foo, .large=bar };
-    else {
-        if (compare_pc(bar, baz) < 0)
-            if (compare_pc(foo, baz) < 0)
+        }
+    } else {
+        if (compare_pc(bar, baz) < 0) {
+            if (compare_pc(foo, baz) < 0) {
                 set = (struct set_of_three) { .small=bar, .middle=foo, .large=baz };
-            else
+            } else {
                 set = (struct set_of_three) { .small=bar, .middle=baz, .large=foo };
-        else
+            }
+        } else {
             set = (struct set_of_three) { .small=baz, .middle=bar, .large=foo };
+        }
     }
 
     return set;
 }
 
 short hash(struct set_of_three set) {
-
+    const size_t prime1 = 31;
+    const size_t prime2 = 37;
+    
+    size_t hash = set.small.a;
+    hash = hash * prime1 + set.small.b;
+    hash = hash * prime2 + set.middle.a;
+    hash = hash * prime2 + set.middle.b;
+    hash = hash * prime1 + set.large.a;
+    hash = hash * prime1 + set.large.b;
+    
+    return hash % HASH_SET_CAPACITY;
 }
 
 void set_add(struct three_sets *s, struct set_of_three addend) {
@@ -104,12 +107,14 @@ void set_add(struct three_sets *s, struct set_of_three addend) {
             already_present = 1;
             break;
         }
+        node = node->next;
     }
     if (!already_present)
     {
         s->arena[s->size] = (struct node) { .set=addend, .next=head };
         s->sets[h] = &s->arena[s->size++];
     }
+    if (s->size > HASH_SET_SIZE) printf("Arena overflowed\n");
 }
 
 void main(int argc, char const *argv[])
@@ -125,6 +130,8 @@ void main(int argc, char const *argv[])
             // Second char of second pc
             for (u8 k = 0; k < GRAPH_SIZE; k++)
             {
+                if ((!adj_lists['t' - 'a'][i][j][k]) || ((j == ('t' - 'a')) && (i == k)))
+                    continue;
                 // First char of third pc
                 for (u8 m = 0; m < GRAPH_SIZE; m++)
                 {
@@ -141,5 +148,5 @@ void main(int argc, char const *argv[])
             }   
         }
     }
-    printf("t three set count: %hd", three_sets.size);
+    printf("t three set count: %hd\n", three_sets.size);
 }

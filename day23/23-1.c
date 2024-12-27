@@ -3,10 +3,24 @@
 #define INPUT_SIZE 3380
 #define LINE_LENGTH 7
 #define GRAPH_SIZE ('z' - 'a' + 1)
+#define HASH_SET_SIZE 1230
+#define HASH_SET_CAPACITY 1657 // prime > size / 0.75
 
 typedef unsigned char u8;
 
-short intersection(u8 **t_neighbors, u8 ** n_neighbors);
+struct set_of_three {
+    short small;
+    short middle;
+    short large;
+};
+
+struct three_sets {
+    struct set_of_three *sets[HASH_SET_CAPACITY];
+    struct set_of_three arena[HASH_SET_SIZE];
+    short size;
+};
+
+void add_intersection(struct three_sets *three_sets, u8 (*t_neighbors)[GRAPH_SIZE], u8 (*n_neighbors)[GRAPH_SIZE]);
 
 // TODO: make these pointers. Instantiate arrays lazily, like a hierarchical page table.
 u8 adj_lists[GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE][GRAPH_SIZE];
@@ -36,30 +50,34 @@ void read_input() {
 void main(int argc, char const *argv[])
 {
     read_input();
-    short three_sets = 0;
+    struct three_sets three_sets = {};
     for (u8 i = 0; i < GRAPH_SIZE; i++)
     {
-        u8 **t_neighbors = (u8**)adj_lists['t' - 'a'][i];
+        u8 (*t_neighbors)[GRAPH_SIZE] = adj_lists['t' - 'a'][i];
         for (u8 j = 0; j < GRAPH_SIZE; j++)
         {
             for (u8 k = 0; k < GRAPH_SIZE; k++)
             {
-                u8 **n_neighbors = (u8**)adj_lists[j][k];
-                three_sets += intersection(t_neighbors, n_neighbors);
+                u8 (*n_neighbors)[GRAPH_SIZE] = adj_lists[j][k];
+                add_intersection(&three_sets, t_neighbors, n_neighbors);
             }   
         }
     }
-    printf("t Three set count: %hd", three_sets >> 1);
+    printf("t three set count: %hd", three_sets.size);
 }
 
-short intersection(u8 **t_neighbors, u8 ** n_neighbors) {
-    short count = 0;
+short intersection(u8 (*t_neighbors)[GRAPH_SIZE], u8 (*n_neighbors)[GRAPH_SIZE]) {
+    
+}
+
+void add_intersection(struct three_sets *three_sets, u8 (*t_neighbors)[GRAPH_SIZE], u8 (*n_neighbors)[GRAPH_SIZE]) {
     for (u8 i = 0; i < GRAPH_SIZE; i++)
     {
         for (u8 j = 0; j < GRAPH_SIZE; j++)
         {
-            count += t_neighbors[i][j] & n_neighbors[i][j];
+            if (t_neighbors[i][j] & n_neighbors[i][j]) {
+                // add set of three to three sets
+            }
         }
     }
-    return count;
 }

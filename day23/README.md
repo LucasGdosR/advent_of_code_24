@@ -6,5 +6,6 @@ Main takeaways:
 - C: hash set implementation;
 - C: converting a length 2 string into a short ranging from 0 to 625;
 2. Part 2:
-- The problem was clearly asking for the maximal clique in the graph. There's value in being able to code up a maximal clique solution, but there's also value in just *recognizing* that it is a maximal clique problem. I patted myself on the back for the pattern matching ability and used a library;
-- Bron-Kerbosch algorithm implementation.
+- The problem was clearly asking for the maximal clique in the graph. There's value in being able to code up a maximal clique solution, but there's also value in just *recognizing* that it is a maximal clique problem. I patted myself on the back for the pattern matching ability and used a library for the first Python solution;
+- Bron-Kerbosch algorithm implementation in C;
+- Implementation of a bitset, including `intersection`, `union`, `difference`, `add`, `remove`, `has`, and `len` functions.

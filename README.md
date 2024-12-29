@@ -3,4 +3,3 @@ This is the first edition of the Advent of Code I participate in. My ***main cha
 
 ***TO DO***:
 - Day 21: part 2 in Python, both in C
-- Day 23: part 2 in C

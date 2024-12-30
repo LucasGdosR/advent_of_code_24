@@ -93,36 +93,21 @@ def can_move_vertically(i, j, di):
     return can_move_vertically(i, j - offset, di) and can_move_vertically(i, j - offset + 1, di)
 
 def move_large_box_vertically(i, left_j, di):
-    # Move levels of boxes, from deepest to the original box.
-    acc = [(i, left_j)]
-    level = deque([(i, left_j)])
-
-    while level:
-        curr_i, curr_j = level.popleft()
-        next_i = curr_i + di
-        next_left = new_warehouse[next_i][curr_j]
-        if next_left == '[':
-            box = (next_i, curr_j)
-            acc.append(box)
-            level.append(box)
-        else:
-            next_right = new_warehouse[next_i][curr_j + 1]
-            if next_left == ']':
-                box = (next_i, curr_j - 1)
-                acc.append(box)
-                level.append(box)
-            if next_right == '[':
-                box = (next_i, curr_j + 1)
-                acc.append(box)
-                level.append(box)
-
-    while acc:
-        # Put [] at the destination. Put .. at the origin.
-        curr_i, curr_j = acc.pop()
-        new_warehouse[curr_i][curr_j] = '.'
-        new_warehouse[curr_i][curr_j + 1] = '.'
-        new_warehouse[curr_i + di][curr_j] = '['
-        new_warehouse[curr_i + di][curr_j + 1] = ']'
+    next_i = i + di
+    right_j = left_j + 1
+    
+    if new_warehouse[next_i][left_j] == '[':
+        move_large_box_vertically(next_i, left_j, di)
+    else:
+        if new_warehouse[next_i][left_j] == ']':
+            move_large_box_vertically(next_i, left_j - 1, di)
+        if new_warehouse[next_i][right_j] == '[':
+            move_large_box_vertically(next_i, right_j, di)
+    
+    new_warehouse[next_i][left_j] = '['
+    new_warehouse[next_i][right_j] = ']'
+    new_warehouse[i][left_j] = '.'
+    new_warehouse[i][right_j] = '.'
 
 def get_directions(m):
     if m == '<':

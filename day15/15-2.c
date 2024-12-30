@@ -5,9 +5,6 @@
 #include <unistd.h>
 
 #define GRID_SIZE 50
-#define QUEUE_POW_2_CONSTANT 4
-#define QUEUE_SIZE (1 << QUEUE_POW_2_CONSTANT)
-#define QUEUE_MASK (QUEUE_SIZE - 1)
 
 typedef __uint8_t u8;
 typedef __int8_t i8;
@@ -22,12 +19,6 @@ struct robot {
 struct moves {
     char *next;
     u16 size;
-};
-
-struct deque {
-    struct robot ps[QUEUE_SIZE];
-    u16 start;
-    u16 end;
 };
 
 void try_to_move(i8 di, i8 dj, struct robot *r, char warehouse[GRID_SIZE][2 * GRID_SIZE]);
@@ -137,60 +128,23 @@ __uint8_t can_move_vertically(u8 i, u8 j, i8 di, char warehouse[GRID_SIZE][2 * G
         && can_move_vertically(i, j - offset + 1, di, warehouse);
 }
 
-void enqueue(struct deque *q, struct robot p) {
-    q->ps[q->end++] = p;
-    q->end &= QUEUE_MASK;
-}
-
-struct robot dequeue(struct deque *q) {
-    struct robot p = q->ps[q->start++];
-    q->start &= QUEUE_MASK;
-    return p;
-}
-
-struct robot pop(struct deque *q) {
-    struct robot p = q->ps[--q->end];
-    q->end &= QUEUE_MASK;
-    return p;
-}
-
 void move_large_box_vertically(u8 i, u8 left_j, i8 di, char warehouse[GRID_SIZE][2 * GRID_SIZE]) {
-    struct deque acc = { .ps=(struct robot){ .i=i, .j=left_j }, .start=0, .end=1 };
-    struct deque level = acc;
+    u8 next_i = i + di;
+    u8 right_j = left_j + 1;
 
-    while (level.start != level.end)
-    {
-        struct robot p = dequeue(&level);
-        u8 next_i = p.i + di;
-        char next_left = warehouse[next_i][p.j];
-        if (next_left == '[') {
-            struct robot box = { .i=next_i, .j=p.j };
-            enqueue(&acc, box);
-            enqueue(&level, box);
-        } else {
-            char next_right = warehouse[next_i][p.j + 1];
-            if (next_left == ']') {
-            struct robot box = { .i=next_i, .j=p.j - 1 };
-            enqueue(&acc, box);
-            enqueue(&level, box);
-            }
-            if (next_right == '[') {
-            struct robot box = { .i=next_i, .j=p.j + 1 };
-            enqueue(&acc, box);
-            enqueue(&level, box);
-            }
-        }
+    if (warehouse[next_i][left_j] == '[')
+        move_large_box_vertically(next_i, left_j, di, warehouse);
+    else {
+        if (warehouse[next_i][left_j] == ']')
+            move_large_box_vertically(next_i, left_j - 1, di, warehouse);
+        if (warehouse[next_i][right_j] == '[')
+            move_large_box_vertically(next_i, right_j, di, warehouse);
     }
-    
-    while (acc.start != acc.end)
-    {
-        // Put [] at the destination. Put .. at the origin.
-        struct robot p = pop(&acc);
-        warehouse[p.i][p.j] = '.';
-        warehouse[p.i][p.j + 1] = '.';
-        warehouse[p.i + di][p.j] = '[';
-        warehouse[p.i + di][p.j + 1] = ']';
-    }
+
+    warehouse[next_i][left_j] = '[';
+    warehouse[next_i][right_j] = ']';
+    warehouse[i][left_j] = '.';
+    warehouse[i][right_j] = '.';
 }
 
 u32 calculate_gps(char warehouse[GRID_SIZE][2 * GRID_SIZE]) {
